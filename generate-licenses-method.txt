@@ -1,0 +1,70 @@
+Admin credentials are:
+
+Email: admin@appdefend.local
+Password: Admin@123
+
+
+Use the generator class I added.
+
+Generate a signing keypair once:
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home \
+mvn -q -Dmaven.repo.local=.m2 -DskipTests compile
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home \
+java -cp target/classes com.appdefend.backend.license.LicenseKeyPairGenerator
+
+Save the generated:
+private key securely with your licensing team
+public key in application.yml (line 28)
+
+Generate a signed license:
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home \
+java -cp target/classes com.appdefend.backend.license.OfflineLicenseGenerator \
+./private-key.pem AIRGAP-DEFAULT "Coding vedha" 250 2026-04-06
+
+
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home \
+mvn -q -Dmaven.repo.local=.m2 -DskipTests compile exec:java \
+-Dexec.mainClass=com.appdefend.backend.license.OfflineLicenseGenerator \
+-Dexec.args="./private-key.pem AIRGAP-DEFAULT \"Coding vedha\" 250 2026-04-06"
+
+Arguments are:
+
+privateKeyPemPath
+deploymentId
+customerName
+maxNamedUsers
+validUntil in YYYY-MM-DD
+This prints:
+
+Payload JSON
+Signature
+Install it in the air-gapped backend with:
+POST /api/v1/licenses/install
+Body:
+
+{
+  "payloadJson": "{...the printed payload json...}",
+  "signature": "....the printed signature...."
+}
+If you want an encrypted bundle too, pass a sixth argument:
+
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home \
+java -cp target/classes com.appdefend.backend.license.OfflineLicenseGenerator \
+/path/to/private-key.pem AIRGAP-DEFAULT "Customer Name" 250 2027-12-31 "StrongBundlePassphrase"
+That also prints Encrypted Bundle JSON, which you can install with:
+POST /api/v1/licenses/install/encrypted
+
+If you want, I can next give you:
+
+an exact sample generated payload
+a Postman/Swagger request body example
+a small shell script to generate licenses for customers quickly
+
+
+
+
+Payload JSON:
+{"customerEmail":"licensing@codingvedha.local","customerName":"Coding vedha","deploymentId":"AIRGAP-DEFAULT","features":["RBAC","OFFLINE_MODE","GITLAB","GITHUB_ACTIONS","JENKINS","BAMBOO","REDIS_CACHE"],"gracePeriodDays":15,"issuedAt":"2026-04-05T13:46:58.002195+05:30","issuer":"App Defend Licensing Authority","licenseId":"LIC-1775377017997","licenseTier":"ENTERPRISE","maxNamedUsers":250,"metadata":{"supportLevel":"24x7","issuedBy":"App Defend Licensing","airGapped":true},"validFrom":"2026-04-05","validUntil":"2026-04-06"}
+
+Signature:
+AjBJwnGD6W/rL4uIznZrWNw4hcUMLh50tG/a+3jziujlYuQclWuo9Pcyw2ydGGeA7iTf4fZFae5ufN6Yw8271bK0E3Wok+SVsCE4YeZSdsUfpyfV3DxooeVbOz7tCcusbUOgECdDhXA7KGjRZpbx9aFccV6FAbPKXLiukZNqbiibekuiwNaMkpdkuj9Eg/kBFbuoSrpA9eULCHrNBcZFxrYOuyqj/Ix3gARjLb9Ufdf9+yueqxDuKmJLCn+2o3CX6y0nc14YPtxcJB50AmYO68V8qwtToIqC9l2GTBQwiwltR/yqoB65fY5a82WLPWGbtaUSt8VY5SLU88DAZBkNKA==

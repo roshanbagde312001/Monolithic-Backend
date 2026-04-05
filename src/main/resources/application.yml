@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: app-defend-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appdefend
+    username: appdefend
+    password: appdefend
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 3s
+  sql:
+    init:
+      mode: always
+      platform: postgres
+
+app:
+  jwt:
+    secret: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    issuer: app-defend-backend
+    access-token-minutes: 30
+    refresh-token-days: 7
+  license:
+    expected-deployment-id: AIRGAP-DEFAULT
+    public-key: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6tp7nXLs63I2gnMl2FoR
+      ef4Xp1gPaH3kzSC8hfT1weNjS8+9f431keQcJXju4f7WQMBgS9mhCm4uc85hK4wb
+      aHcQFKdp7On94tWM+JvIWhjsGoQeTxTqv9oBERfhcIXu2fnw6HCohBWYHbek/LCn
+      qI/DZzwubDczrf6N4xBLZn6CHuEA5TSuTH89oLk2CsQcaPavY+epgMDaaL9jrnKG
+      zKL+z0/PPFW41XggwLOKIZP9HDe2zmC2ODVi62lZd7CAbLijDszE/dGsypahkHpO
+      ZOep3dfO6cvQFwt5HpQQmacxdm2i32qfDGP9H3/G7yAfIJ4/zOZpEL2pDWCd5VSR
+      hwIDAQAB
+      -----END PUBLIC KEY-----
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
