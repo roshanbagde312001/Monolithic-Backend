@@ -54,11 +54,52 @@ CREATE TABLE IF NOT EXISTS integrations (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(120) NOT NULL,
     provider_type VARCHAR(40) NOT NULL,
+    deployment_mode VARCHAR(40),
+    namespace_path VARCHAR(255),
     base_url VARCHAR(255) NOT NULL,
     credentials_json TEXT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS deployment_mode VARCHAR(40);
+ALTER TABLE integrations ADD COLUMN IF NOT EXISTS namespace_path VARCHAR(255);
+
+CREATE TABLE IF NOT EXISTS gitlab_groups (
+    id BIGSERIAL PRIMARY KEY,
+    integration_id BIGINT NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+    gitlab_group_id BIGINT NOT NULL,
+    full_path VARCHAR(255),
+    name VARCHAR(255),
+    path VARCHAR(255),
+    visibility VARCHAR(40),
+    web_url VARCHAR(500),
+    parent_id BIGINT,
+    raw_json TEXT NOT NULL,
+    synced_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (integration_id, gitlab_group_id)
+);
+
+CREATE TABLE IF NOT EXISTS gitlab_projects (
+    id BIGSERIAL PRIMARY KEY,
+    integration_id BIGINT NOT NULL REFERENCES integrations(id) ON DELETE CASCADE,
+    gitlab_project_id BIGINT NOT NULL,
+    namespace_id BIGINT,
+    namespace_full_path VARCHAR(255),
+    name VARCHAR(255),
+    path VARCHAR(255),
+    path_with_namespace VARCHAR(500),
+    default_branch VARCHAR(255),
+    visibility VARCHAR(40),
+    web_url VARCHAR(500),
+    http_url_to_repo VARCHAR(500),
+    ssh_url_to_repo VARCHAR(500),
+    archived BOOLEAN,
+    empty_repo BOOLEAN,
+    raw_json TEXT NOT NULL,
+    synced_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (integration_id, gitlab_project_id)
 );
 
 CREATE TABLE IF NOT EXISTS licenses (
@@ -94,5 +135,8 @@ CREATE TABLE IF NOT EXISTS license_audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_permissions_module_name ON permissions(module_name);
 CREATE INDEX IF NOT EXISTS idx_integrations_provider_type ON integrations(provider_type);
+CREATE INDEX IF NOT EXISTS idx_integrations_namespace_path ON integrations(namespace_path);
+CREATE INDEX IF NOT EXISTS idx_gitlab_groups_integration_id ON gitlab_groups(integration_id);
+CREATE INDEX IF NOT EXISTS idx_gitlab_projects_integration_id ON gitlab_projects(integration_id);
 CREATE INDEX IF NOT EXISTS idx_licenses_active ON licenses(active);
 CREATE INDEX IF NOT EXISTS idx_license_audit_created_at ON license_audit_log(created_at);

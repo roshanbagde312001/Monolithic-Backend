@@ -2,6 +2,7 @@ package com.appdefend.backend.controller;
 
 import com.appdefend.backend.dto.IntegrationDtos.CreateIntegrationRequest;
 import com.appdefend.backend.model.OemIntegration;
+import com.appdefend.backend.service.GitLabSyncService;
 import com.appdefend.backend.service.IntegrationService;
 import com.appdefend.backend.service.LicenseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +25,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Integrations", description = "OEM integration management APIs for GitLab, GitHub Actions, Jenkins and Bamboo")
 public class IntegrationController {
     private final IntegrationService integrationService;
+    private final GitLabSyncService gitLabSyncService;
     private final LicenseService licenseService;
 
-    public IntegrationController(IntegrationService integrationService, LicenseService licenseService) {
+    public IntegrationController(IntegrationService integrationService,
+                                 GitLabSyncService gitLabSyncService,
+                                 LicenseService licenseService) {
         this.integrationService = integrationService;
+        this.gitLabSyncService = gitLabSyncService;
         this.licenseService = licenseService;
     }
 
@@ -48,6 +53,8 @@ public class IntegrationController {
             null,
             request.name(),
             request.providerType(),
+            request.deploymentMode(),
+            request.namespacePath(),
             request.baseUrl(),
             request.credentialsJson(),
             request.active(),
@@ -65,6 +72,8 @@ public class IntegrationController {
             id,
             request.name(),
             request.providerType(),
+            request.deploymentMode(),
+            request.namespacePath(),
             request.baseUrl(),
             request.credentialsJson(),
             request.active(),
@@ -93,5 +102,38 @@ public class IntegrationController {
     @Operation(summary = "List supported OEM providers")
     public Object providers() {
         return Map.of("supportedProviders", java.util.Arrays.stream(com.appdefend.backend.model.IntegrationProviderType.values()).toList());
+    }
+
+    @GetMapping("/{id}/gitlab/namespaces")
+    @PreAuthorize("hasAuthority('INTEGRATION_READ')")
+    @Operation(summary = "List GitLab namespaces")
+    public Object gitLabNamespaces(@PathVariable Long id) {
+        licenseService.assertFeatureEnabled("GITLAB", "INTEGRATION");
+        return gitLabSyncService.fetchNamespaces(id);
+    }
+
+    @PostMapping("/{id}/gitlab/sync")
+    @PreAuthorize("hasAuthority('INTEGRATION_WRITE')")
+    @Operation(summary = "Sync GitLab groups and projects")
+    public ResponseEntity<Void> syncGitLab(@PathVariable Long id) {
+        licenseService.assertFeatureEnabled("GITLAB", "INTEGRATION");
+        gitLabSyncService.sync(id);
+        return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/{id}/gitlab/groups")
+    @PreAuthorize("hasAuthority('INTEGRATION_READ')")
+    @Operation(summary = "Get stored GitLab groups")
+    public Object gitLabGroups(@PathVariable Long id) {
+        licenseService.assertFeatureEnabled("GITLAB", "INTEGRATION");
+        return gitLabSyncService.storedGroups(id);
+    }
+
+    @GetMapping("/{id}/gitlab/projects")
+    @PreAuthorize("hasAuthority('INTEGRATION_READ')")
+    @Operation(summary = "Get stored GitLab projects")
+    public Object gitLabProjects(@PathVariable Long id) {
+        licenseService.assertFeatureEnabled("GITLAB", "INTEGRATION");
+        return gitLabSyncService.storedProjects(id);
     }
 }

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Defend Test Console</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page-shell">
+    <header class="hero">
+        <div>
+            <p class="eyebrow">App Defend</p>
+            <h1>Functional Test Console</h1>
+            <p class="hero-copy">A simple UI to exercise authentication, users, RBAC, integrations, license install, reporting, and health from one place.</p>
+        </div>
+        <div class="hero-status">
+            <div class="status-chip" id="auth-status">Not Authenticated</div>
+            <div class="status-chip secondary" id="license-status-chip">License Unknown</div>
+        </div>
+    </header>
+
+    <main class="grid">
+        <section class="card accent">
+            <div class="card-head">
+                <h2>Session</h2>
+                <button class="ghost" id="btn-clear-token">Clear Token</button>
+            </div>
+            <form id="login-form" class="stack">
+                <label>Email
+                    <input type="email" id="login-email" value="admin@appdefend.local" required>
+                </label>
+                <label>Password
+                    <input type="password" id="login-password" value="Admin@123" required>
+                </label>
+                <div class="actions">
+                    <button type="submit">Login</button>
+                    <button type="button" class="secondary" id="btn-health">Health Check</button>
+                    <button type="button" class="secondary" id="btn-license-status">License Status</button>
+                </div>
+            </form>
+            <label>Access Token
+                <textarea id="token-box" rows="6" placeholder="JWT token will appear here"></textarea>
+            </label>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Users</h2>
+                <button class="ghost" id="btn-users-list">Refresh Users</button>
+            </div>
+            <form id="user-form" class="stack">
+                <label>Full Name
+                    <input type="text" id="user-full-name" value="Test Analyst">
+                </label>
+                <label>Email
+                    <input type="email" id="user-email" value="analyst@appdefend.local">
+                </label>
+                <label>Password
+                    <input type="password" id="user-password" value="Analyst@123">
+                </label>
+                <label>Role Ids
+                    <input type="text" id="user-role-ids" value="2" placeholder="Comma separated, e.g. 1,2">
+                </label>
+                <label class="inline-check">
+                    <input type="checkbox" id="user-enabled" checked>
+                    Enable User
+                </label>
+                <button type="submit">Create User</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>RBAC</h2>
+                <div class="mini-actions">
+                    <button class="ghost" id="btn-roles-list">Roles</button>
+                    <button class="ghost" id="btn-permissions-list">Permissions</button>
+                    <button class="ghost" id="btn-views-list">Views</button>
+                </div>
+            </div>
+            <form id="role-form" class="stack split">
+                <label>Role Code
+                    <input type="text" id="role-code" value="APPSEC_TESTER">
+                </label>
+                <label>Role Name
+                    <input type="text" id="role-name" value="AppSec Tester">
+                </label>
+                <label class="full">Description
+                    <input type="text" id="role-description" value="Temporary role from UI">
+                </label>
+                <button type="submit" class="full">Create Role</button>
+            </form>
+            <form id="permission-form" class="stack split top-gap">
+                <label>Permission Code
+                    <input type="text" id="permission-code" value="SCAN_READ">
+                </label>
+                <label>Module
+                    <input type="text" id="permission-module" value="SCANNER">
+                </label>
+                <label>Permission Name
+                    <input type="text" id="permission-name" value="Read Scan Results">
+                </label>
+                <label>Description
+                    <input type="text" id="permission-description" value="Read scanner data">
+                </label>
+                <button type="submit" class="full">Create Permission</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Integrations</h2>
+                <button class="ghost" id="btn-integrations-list">Refresh Integrations</button>
+            </div>
+            <div class="integration-shell">
+                <form id="integration-form" class="stack popup-form">
+                    <div class="tooltip hidden" id="integration-tooltip" role="status" aria-live="polite"></div>
+                    <label>Name
+                        <input type="text" id="integration-name" value="GitLab Local">
+                    </label>
+                    <label>Provider
+                        <select id="integration-provider">
+                            <option>GITLAB</option>
+                            <option>GITHUB_ACTIONS</option>
+                            <option>JENKINS</option>
+                            <option>BAMBOO</option>
+                        </select>
+                    </label>
+                    <div class="gitlab-fields" id="gitlab-fields">
+                        <label>Deployment Mode
+                            <select id="integration-deployment-mode">
+                                <option value="SAAS">SAAS</option>
+                                <option value="SELF_MANAGED">SELF_MANAGED</option>
+                            </select>
+                        </label>
+                        <label id="namespace-field">Namespace
+                            <input type="text" id="integration-namespace" value="my-group/platform" placeholder="my-group/platform">
+                        </label>
+                    </div>
+                    <p class="helper-copy" id="namespace-preview">Namespace URL: https://gitlab.example.com/my-group/platform</p>
+                    <label>Base URL
+                        <input type="text" id="integration-url" value="https://gitlab.example.com/api/v4">
+                    </label>
+                    <label>Credentials JSON
+                        <textarea id="integration-credentials" rows="6">{"token":"replace-me"}</textarea>
+                    </label>
+                    <label class="inline-check">
+                        <input type="checkbox" id="integration-active" checked>
+                        Active
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Create Integration</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="card wide">
+            <div class="card-head">
+                <h2>Licensing</h2>
+                <div class="mini-actions">
+                    <button class="ghost" id="btn-license-report">Capacity Report</button>
+                    <button class="ghost" id="btn-license-audit">Audit</button>
+                    <button class="ghost" id="btn-license-debug">Debug Verify</button>
+                </div>
+            </div>
+            <form id="license-form" class="stack">
+                <label>Payload JSON
+                    <textarea id="license-payload" rows="8" placeholder="Paste the generated Payload JSON value"></textarea>
+                </label>
+                <label>Signature
+                    <textarea id="license-signature" rows="4" placeholder="Paste the generated Signature"></textarea>
+                </label>
+                <div class="actions">
+                    <button type="submit">Install License</button>
+                    <button type="button" class="secondary" id="btn-encrypt-bundle">Create Encrypted Bundle</button>
+                </div>
+                <label>Bundle Passphrase
+                    <input type="text" id="bundle-passphrase" value="AppDefendBundle@123">
+                </label>
+                <label>Encrypted Bundle Output
+                    <textarea id="bundle-output" rows="6" placeholder="Encrypted bundle response will appear here"></textarea>
+                </label>
+            </form>
+        </section>
+
+        <section class="card full">
+            <div class="card-head">
+                <h2>Response Console</h2>
+                <button class="ghost" id="btn-clear-console">Clear</button>
+            </div>
+            <pre id="console-output">Ready.</pre>
+        </section>
+    </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

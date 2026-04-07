@@ -19,13 +19,15 @@ public class IntegrationRepository {
 
     public List<OemIntegration> findAll() {
         return jdbcTemplate.query("""
-            SELECT id, name, provider_type, base_url, credentials_json, active, created_at, updated_at
+            SELECT id, name, provider_type, deployment_mode, namespace_path, base_url, credentials_json, active, created_at, updated_at
             FROM integrations
             ORDER BY id
             """, (rs, rowNum) -> new OemIntegration(
             rs.getLong("id"),
             rs.getString("name"),
             IntegrationProviderType.valueOf(rs.getString("provider_type")),
+            rs.getString("deployment_mode"),
+            rs.getString("namespace_path"),
             rs.getString("base_url"),
             rs.getString("credentials_json"),
             rs.getBoolean("active"),
@@ -36,13 +38,15 @@ public class IntegrationRepository {
 
     public Optional<OemIntegration> findById(Long id) {
         List<OemIntegration> list = jdbcTemplate.query("""
-            SELECT id, name, provider_type, base_url, credentials_json, active, created_at, updated_at
+            SELECT id, name, provider_type, deployment_mode, namespace_path, base_url, credentials_json, active, created_at, updated_at
             FROM integrations
             WHERE id = ?
             """, (rs, rowNum) -> new OemIntegration(
             rs.getLong("id"),
             rs.getString("name"),
             IntegrationProviderType.valueOf(rs.getString("provider_type")),
+            rs.getString("deployment_mode"),
+            rs.getString("namespace_path"),
             rs.getString("base_url"),
             rs.getString("credentials_json"),
             rs.getBoolean("active"),
@@ -52,29 +56,33 @@ public class IntegrationRepository {
         return list.stream().findFirst();
     }
 
-    public Long create(String name, IntegrationProviderType providerType, String baseUrl, String credentialsJson, boolean active) {
+    public Long create(String name, IntegrationProviderType providerType, String deploymentMode, String namespacePath,
+                       String baseUrl, String credentialsJson, boolean active) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             var ps = connection.prepareStatement("""
-                INSERT INTO integrations (name, provider_type, base_url, credentials_json, active)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO integrations (name, provider_type, deployment_mode, namespace_path, base_url, credentials_json, active)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, new String[]{"id"});
             ps.setString(1, name);
             ps.setString(2, providerType.name());
-            ps.setString(3, baseUrl);
-            ps.setString(4, credentialsJson);
-            ps.setBoolean(5, active);
+            ps.setString(3, deploymentMode);
+            ps.setString(4, namespacePath);
+            ps.setString(5, baseUrl);
+            ps.setString(6, credentialsJson);
+            ps.setBoolean(7, active);
             return ps;
         }, keyHolder);
         return keyHolder.getKey().longValue();
     }
 
-    public void update(Long id, String name, IntegrationProviderType providerType, String baseUrl, String credentialsJson, boolean active) {
+    public void update(Long id, String name, IntegrationProviderType providerType, String deploymentMode, String namespacePath,
+                       String baseUrl, String credentialsJson, boolean active) {
         jdbcTemplate.update("""
             UPDATE integrations
-            SET name = ?, provider_type = ?, base_url = ?, credentials_json = ?, active = ?, updated_at = CURRENT_TIMESTAMP
+            SET name = ?, provider_type = ?, deployment_mode = ?, namespace_path = ?, base_url = ?, credentials_json = ?, active = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
-            """, name, providerType.name(), baseUrl, credentialsJson, active, id);
+            """, name, providerType.name(), deploymentMode, namespacePath, baseUrl, credentialsJson, active, id);
     }
 
     public void delete(Long id) {

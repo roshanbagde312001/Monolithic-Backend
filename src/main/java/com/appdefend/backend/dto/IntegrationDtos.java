@@ -11,6 +11,8 @@ public final class IntegrationDtos {
     public record CreateIntegrationRequest(
         @NotBlank String name,
         @NotNull IntegrationProviderType providerType,
+        String deploymentMode,
+        String namespacePath,
         @NotBlank String baseUrl,
         @NotBlank String credentialsJson,
         boolean active
@@ -21,6 +23,44 @@ public final class IntegrationDtos {
         boolean success,
         String provider,
         String message
+    ) {
+    }
+
+    public record GitLabNamespaceResponse(
+        Long id,
+        String name,
+        String fullPath,
+        String kind,
+        String webUrl,
+        String rawJson
+    ) {
+    }
+
+    public record GitLabGroupResponse(
+        Long gitlabGroupId,
+        String name,
+        String path,
+        String fullPath,
+        String visibility,
+        String webUrl,
+        String rawJson
+    ) {
+    }
+
+    public record GitLabProjectResponse(
+        Long gitlabProjectId,
+        String name,
+        String path,
+        String pathWithNamespace,
+        String namespaceFullPath,
+        String defaultBranch,
+        String visibility,
+        String webUrl,
+        String httpUrlToRepo,
+        String sshUrlToRepo,
+        Boolean archived,
+        Boolean emptyRepo,
+        String rawJson
     ) {
     }
 }

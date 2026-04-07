@@ -6,6 +6,8 @@ public record OemIntegration(
     Long id,
     String name,
     IntegrationProviderType providerType,
+    String deploymentMode,
+    String namespacePath,
     String baseUrl,
     String credentialsJson,
     boolean active,

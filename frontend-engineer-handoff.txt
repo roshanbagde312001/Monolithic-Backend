@@ -1,0 +1,856 @@
+APP DEFEND FRONTEND HANDOFF
+Version: 1
+Audience: Frontend engineer building the primary web application UI
+
+1. PRODUCT SUMMARY
+
+Build a modern React.js frontend for App Defend, an enterprise application security platform.
+The frontend should feel premium, clean, modern, and operationally serious.
+This is not a generic admin template. Avoid flat boilerplate dashboards.
+
+Core modules currently available in backend:
+- Authentication with JWT access token and refresh token
+- User management
+- RBAC management for roles, permissions, and views
+- OEM integrations
+- GitLab integration sync for namespaces, groups, and projects
+- License install, license status, audit, and capacity reporting
+- Health endpoint
+
+2. REQUIRED FRONTEND STACK
+
+Use this stack unless there is a strong implementation reason not to:
+- React 18+
+- TypeScript
+- Vite
+- React Router
+- TanStack Query for server state
+- Zustand or Context API for auth/session state
+- Axios for API client
+- React Hook Form for forms
+- Zod for schema validation
+- Tailwind CSS or CSS Modules
+- Heroicons or Lucide React for icons
+
+Preferred supporting patterns:
+- Feature-based folder structure
+- Typed API client wrappers
+- Protected routes
+- Reusable layout shell
+- Centralized error handling
+- Token refresh interceptor
+
+3. VISUAL DIRECTION
+
+The application should look modern, controlled, and enterprise-ready.
+Design intent:
+- light theme first
+- clean neutral base with one strong brand accent
+- spacious layout
+- strong typography hierarchy
+- subtle gradients or texture, not loud gamer-style visuals
+- polished cards, tables, filters, and empty states
+- smooth hover and loading states
+
+Avoid:
+- default template look
+- purple-heavy generic dashboards
+- overly rounded toy-like interfaces
+- dense legacy admin layouts
+
+Suggested look and feel:
+- top navigation plus contextual page header
+- left navigation for core modules on authenticated screens
+- searchable tables
+- summary cards on home/dashboard
+- activity and status blocks
+- account menu in top-right
+
+4. APP SHELL REQUIREMENTS
+
+4.1 Global layout
+
+Authenticated layout should include:
+- left sidebar navigation
+- top navbar
+- logo
+- search bar
+- notifications placeholder
+- account icon/avatar
+- account dropdown
+- page breadcrumb or section title
+- content area with responsive grid
+
+Public layout should include:
+- branded login screen
+- optional product marketing copy
+- minimal distraction
+
+4.2 Navbar content
+
+Top navbar must include:
+- logo on left
+- global search bar
+- current page title or breadcrumb
+- license status badge
+- user account avatar/icon
+- account dropdown
+
+Account dropdown should include:
+- user name/email
+- profile placeholder
+- logout
+
+4.3 Sidebar navigation
+
+Minimum navigation items:
+- Home
+- Users
+- RBAC
+- Integrations
+- GitLab
+- Licenses
+- Audit / Reports
+
+Navigation must be filtered by access control data from the authenticated user object.
+
+Role / permission / view behavior required:
+- use user.roles, user.permissions, and user.views from login response
+- page visibility should be controlled at navigation level
+- route access should be controlled at route level
+- action buttons should be controlled at component level
+
+Access-control rules for frontend:
+- roles are high-level user grouping labels
+- permissions control whether actions are visible or executable
+- views control whether user should see a page or section in navigation
+
+Required frontend utilities:
+- hasRole(roleCode)
+- hasPermission(permissionCode)
+- hasView(viewCode)
+- canAccessPage(viewCode, fallbackPermissions)
+- guardRoute(viewCode or permissionCode)
+
+Minimum view mapping for initial pages:
+- Home page -> DASHBOARD
+- Users page -> USER_MANAGEMENT
+- RBAC page -> RBAC_MANAGEMENT
+- Integrations page -> INTEGRATION_MANAGEMENT
+- Licenses page -> LICENSE_MANAGEMENT
+
+Minimum permission mapping for actions:
+- list users -> USER_READ
+- create/update/delete users -> USER_WRITE
+- list roles -> ROLE_READ
+- create/update/delete roles -> ROLE_WRITE
+- assign permissions/views to role -> ROLE_WRITE
+- list permissions -> PERMISSION_READ
+- create/update/delete permissions -> PERMISSION_WRITE
+- list views -> VIEW_READ
+- create/update/delete views -> VIEW_WRITE
+- integrations list/test -> INTEGRATION_READ
+- integrations create/update/delete -> INTEGRATION_WRITE
+- license status -> LICENSE_READ
+- license install/encrypted install/create bundle -> LICENSE_WRITE
+- license audit -> LICENSE_AUDIT_READ
+- license reports -> LICENSE_REPORT_READ
+
+UI behavior requirement:
+- hide inaccessible pages from sidebar
+- block direct route access to unauthorized pages
+- hide unauthorized action buttons
+- show read-only mode where sensible
+- show a clean unauthorized state rather than crashing
+
+5. INITIAL FRONTEND PAGES
+
+5.1 Login page
+
+Purpose:
+- authenticate user
+- store access token and refresh token
+- redirect to home
+
+Must have:
+- email input
+- password input
+- login button
+- error state
+- loading state
+
+5.2 Home page / dashboard
+
+Purpose:
+- show operational overview
+
+Recommended blocks:
+- welcome card with user summary
+- license status summary
+- user count summary
+- integration count summary
+- recent license audit summary
+- GitLab sync shortcut
+
+5.3 Users page
+
+Purpose:
+- view and manage users
+
+Must support:
+- list users
+- create user
+- update user
+- delete user
+
+Recommended UI:
+- table view
+- create/edit drawer or modal
+- role assignment multi-select
+- enabled toggle
+
+5.4 RBAC page
+
+Purpose:
+- manage roles, permissions, and views
+
+Must support:
+- list roles
+- create role
+- update role
+- delete role
+- list permissions
+- create permission
+- update permission
+- delete permission
+- list views
+- create view
+- update view
+- delete view
+- assign permission to role
+- assign view to role
+
+Recommended UI:
+- tabbed interface with Roles / Permissions / Views
+- detail side panel for selected role
+
+5.5 Integrations page
+
+Purpose:
+- create and manage OEM integrations
+
+Must support:
+- list integrations
+- create integration
+- update integration
+- delete integration
+- test integration
+- list supported providers
+
+GitLab-specific behavior:
+- if provider is GITLAB and deployment mode is SAAS, show namespace text input
+- namespace must be entered manually as `namespacePath`
+- visually compose and display the effective namespace URL as `<gitlab-host>/<namespacePath>`
+- if provider is GITLAB and deployment mode is SELF_MANAGED, do not require namespace
+
+5.6 GitLab page
+
+Purpose:
+- dedicated operational page for GitLab sync and inspection
+
+Must support:
+- select existing GitLab integration
+- show namespace text value for SaaS integrations
+- trigger GitLab sync
+- display stored groups table
+- display stored projects table
+
+Rules:
+- SaaS mode: sync only namespace-scoped groups and projects
+- Self-managed mode: sync all accessible projects and groups
+
+Recommended UI:
+- integration selector
+- sync button
+- namespace badge
+- separate tabs for Groups and Projects
+- searchable data tables
+- raw JSON detail modal for a row
+
+5.7 Licenses page
+
+Purpose:
+- manage license install and reporting
+
+Must support:
+- show license status
+- install plain license
+- install encrypted license bundle
+- create encrypted bundle
+- view capacity report
+- view license audit
+
+Important:
+- debug endpoints exist only for temporary troubleshooting and should not be exposed in polished production UI
+
+5.8 Not found and unauthorized pages
+
+Create:
+- 404 page
+- unauthorized / forbidden page
+
+6. AUTH FLOW
+
+6.1 Login
+
+Endpoint:
+- POST /api/v1/auth/login
+
+Request:
+{
+  "email": "admin@appdefend.local",
+  "password": "Admin@123"
+}
+
+Response fields:
+- accessToken
+- refreshToken
+- expiresInSeconds
+- user
+
+Login response shape:
+{
+  "accessToken": "<jwt>",
+  "refreshToken": "<jwt>",
+  "expiresInSeconds": 1800,
+  "user": {
+    "id": 1,
+    "fullName": "Platform Admin",
+    "email": "admin@appdefend.local",
+    "roles": ["SUPER_ADMIN"],
+    "permissions": ["USER_READ", "USER_WRITE", "ROLE_READ"],
+    "views": ["DASHBOARD", "USER_MANAGEMENT", "RBAC_MANAGEMENT"]
+  }
+}
+
+6.2 Refresh token
+
+Endpoint:
+- POST /api/v1/auth/refresh
+
+Request:
+{
+  "refreshToken": "<refresh-token>"
+}
+
+6.3 Logout
+
+Endpoint:
+- POST /api/v1/auth/logout
+
+Request:
+{
+  "accessToken": "<access-token>",
+  "refreshToken": "<refresh-token>"
+}
+
+6.4 Frontend auth handling requirements
+
+- store tokens securely in memory plus persistent storage if needed
+- add Authorization header: Bearer <accessToken>
+- on 401, try refresh once
+- if refresh fails, clear session and redirect to login
+- store logged-in user object from login response
+- derive role/permission/view based UI state from login response
+
+7. API CONTRACT SUMMARY
+
+Base URL:
+- /api/v1
+
+7.1 Health
+
+GET /api/v1/health
+
+Response shape:
+{
+  "status": "UP",
+  "service": "app-defend-backend",
+  "timestamp": "2026-04-06T10:10:10Z"
+}
+
+7.2 Users
+
+GET /api/v1/users
+POST /api/v1/users
+PUT /api/v1/users/{userId}
+DELETE /api/v1/users/{userId}
+
+Users list response shape:
+[
+  {
+    "id": 1,
+    "fullName": "Platform Admin",
+    "email": "admin@appdefend.local",
+    "roles": ["SUPER_ADMIN"],
+    "permissions": ["USER_READ", "USER_WRITE"],
+    "views": ["DASHBOARD", "USER_MANAGEMENT"]
+  }
+]
+
+Create user payload:
+{
+  "fullName": "Test User",
+  "email": "user@appdefend.local",
+  "password": "User@12345",
+  "enabled": true,
+  "roleIds": [2]
+}
+
+Update user payload:
+{
+  "fullName": "Updated User",
+  "enabled": true,
+  "roleIds": [2, 3]
+}
+
+Create/update user response shape:
+{
+  "id": 6,
+  "fullName": "Updated User",
+  "email": "user@appdefend.local",
+  "roles": ["SECURITY_ANALYST"],
+  "permissions": ["USER_READ"],
+  "views": ["DASHBOARD"]
+}
+
+7.3 RBAC
+
+GET /api/v1/rbac/roles
+POST /api/v1/rbac/roles
+PUT /api/v1/rbac/roles/{roleId}
+DELETE /api/v1/rbac/roles/{roleId}
+POST /api/v1/rbac/roles/{roleId}/permissions/{permissionId}
+POST /api/v1/rbac/roles/{roleId}/views/{viewId}
+
+GET /api/v1/rbac/permissions
+POST /api/v1/rbac/permissions
+PUT /api/v1/rbac/permissions/{permissionId}
+DELETE /api/v1/rbac/permissions/{permissionId}
+
+GET /api/v1/rbac/views
+POST /api/v1/rbac/views
+PUT /api/v1/rbac/views/{viewId}
+DELETE /api/v1/rbac/views/{viewId}
+
+Create role payload:
+{
+  "code": "APPSEC_TESTER",
+  "name": "AppSec Tester",
+  "description": "Tester role"
+}
+
+Create permission payload:
+{
+  "code": "SCAN_READ",
+  "name": "Read Scan Results",
+  "description": "Allows reading scan results",
+  "moduleName": "SCANNER"
+}
+
+Create view payload:
+{
+  "code": "SCANNER_DASHBOARD",
+  "name": "Scanner Dashboard",
+  "route": "/scanner",
+  "description": "Scanner page"
+}
+
+Roles list response shape:
+[
+  {
+    "id": 1,
+    "code": "SUPER_ADMIN",
+    "name": "Super Admin",
+    "description": "Full platform access"
+  }
+]
+
+Permissions list response shape:
+[
+  {
+    "id": 1,
+    "code": "USER_READ",
+    "name": "Read Users",
+    "description": "View users and profiles",
+    "moduleName": "USER"
+  }
+]
+
+Views list response shape:
+[
+  {
+    "id": 1,
+    "code": "DASHBOARD",
+    "name": "Dashboard",
+    "route": "/dashboard",
+    "description": "Main dashboard"
+  }
+]
+
+Create role / permission / view success response:
+{
+  "id": 10
+}
+
+7.4 Integrations
+
+GET /api/v1/integrations
+POST /api/v1/integrations
+PUT /api/v1/integrations/{id}
+DELETE /api/v1/integrations/{id}
+POST /api/v1/integrations/{id}/test
+GET /api/v1/integrations/providers
+
+GitLab-specific:
+POST /api/v1/integrations/{id}/gitlab/sync
+GET /api/v1/integrations/{id}/gitlab/groups
+GET /api/v1/integrations/{id}/gitlab/projects
+
+Create / update integration payload:
+{
+  "name": "GitLab SaaS Primary",
+  "providerType": "GITLAB",
+  "deploymentMode": "SAAS",
+  "namespacePath": "my-group/platform",
+  "baseUrl": "https://gitlab.com/api/v4",
+  "credentialsJson": "{\"token\":\"<gitlab-token>\"}",
+  "active": true
+}
+
+SaaS GitLab URL rule:
+- `baseUrl` is the GitLab host/API root used by the backend, for example `https://gitlab.com/api/v4`
+- `namespacePath` is the path segment under that host, for example `my-group/platform`
+- frontend should visually show the composed namespace URL as `https://gitlab.com/my-group/platform`
+
+For self-managed GitLab:
+{
+  "name": "GitLab Self Managed",
+  "providerType": "GITLAB",
+  "deploymentMode": "SELF_MANAGED",
+  "namespacePath": "",
+  "baseUrl": "https://gitlab.company.local/api/v4",
+  "credentialsJson": "{\"token\":\"<gitlab-token>\"}",
+  "active": true
+}
+
+Integration list / create / update response shape:
+[
+  {
+    "id": 1,
+    "name": "GitLab SaaS Primary",
+    "providerType": "GITLAB",
+    "deploymentMode": "SAAS",
+    "namespacePath": "my-group/platform",
+    "baseUrl": "https://gitlab.com/api/v4",
+    "credentialsJson": "{\"token\":\"***\"}",
+    "active": true,
+    "createdAt": "2026-04-06T10:10:10",
+    "updatedAt": "2026-04-06T10:10:10"
+  }
+]
+
+Test integration response shape:
+{
+  "success": true,
+  "provider": "GITLAB",
+  "message": "Connectivity test completed"
+}
+
+Supported providers response shape:
+{
+  "supportedProviders": ["GITLAB", "GITHUB_ACTIONS", "JENKINS", "BAMBOO"]
+}
+
+GitLab groups response shape:
+[
+  {
+    "gitlabGroupId": 1001,
+    "name": "Platform",
+    "path": "platform",
+    "fullPath": "my-group/platform",
+    "visibility": "private",
+    "webUrl": "https://gitlab.com/groups/my-group/platform",
+    "rawJson": "{...}"
+  }
+]
+
+GitLab projects response shape:
+[
+  {
+    "gitlabProjectId": 2001,
+    "name": "backend-service",
+    "path": "backend-service",
+    "pathWithNamespace": "my-group/platform/backend-service",
+    "namespaceFullPath": "my-group/platform",
+    "defaultBranch": "main",
+    "visibility": "private",
+    "webUrl": "https://gitlab.com/my-group/platform/backend-service",
+    "httpUrlToRepo": "https://gitlab.com/my-group/platform/backend-service.git",
+    "sshUrlToRepo": "git@gitlab.com:my-group/platform/backend-service.git",
+    "archived": false,
+    "emptyRepo": false,
+    "rawJson": "{...}"
+  }
+]
+
+7.5 Licenses
+
+GET /api/v1/licenses/status
+POST /api/v1/licenses/install
+POST /api/v1/licenses/install/encrypted
+POST /api/v1/licenses/bundles/encrypt
+GET /api/v1/licenses/audit?limit=25
+GET /api/v1/licenses/reports/capacity
+
+Plain install payload:
+{
+  "payloadJson": "{\"licenseId\":\"...\"}",
+  "signature": "..."
+}
+
+Encrypted install payload:
+{
+  "encryptedPayloadBase64": "...",
+  "ivBase64": "...",
+  "saltBase64": "...",
+  "signature": "...",
+  "passphrase": "..."
+}
+
+Create encrypted bundle payload:
+{
+  "payloadJson": "{\"licenseId\":\"...\"}",
+  "signature": "...",
+  "passphrase": "StrongBundlePassphrase"
+}
+
+License status response shape:
+{
+  "licenseId": "LIC-1775377777152",
+  "customerName": "Coding vedha",
+  "deploymentId": "AIRGAP-DEFAULT",
+  "tier": "ENTERPRISE",
+  "validFrom": "2026-04-05",
+  "validUntil": "2027-04-06",
+  "gracePeriodDays": 15,
+  "maxNamedUsers": 250,
+  "currentEnabledUsers": 1,
+  "remainingNamedUsers": 249,
+  "status": "VALID",
+  "loginAllowed": true,
+  "provisioningAllowed": true
+}
+
+License capacity report response shape:
+{
+  "licenseId": "LIC-1775377777152",
+  "tier": "ENTERPRISE",
+  "deploymentId": "AIRGAP-DEFAULT",
+  "maxNamedUsers": 250,
+  "currentEnabledUsers": 1,
+  "remainingNamedUsers": 249,
+  "utilizationPercent": 0.4,
+  "validUntil": "2027-04-06",
+  "daysUntilExpiry": 365,
+  "enabledFeatures": ["RBAC", "OFFLINE_MODE", "GITLAB"]
+}
+
+License audit response shape:
+[
+  {
+    "id": 14,
+    "eventType": "LICENSE_INSTALL",
+    "eventStatus": "SUCCESS",
+    "licenseId": "LIC-1775377777152",
+    "actor": "system-api",
+    "moduleName": "LICENSE",
+    "detailsJson": "{\"validUntil\":\"2027-04-06\",\"maxNamedUsers\":250,\"tier\":\"ENTERPRISE\"}",
+    "createdAt": "2026-04-06T14:13:58.674034"
+  }
+]
+
+8. GITLAB FRONTEND UX RULES
+
+When user selects providerType = GITLAB:
+- show deployment mode selector
+- allowed values:
+  - SAAS
+  - SELF_MANAGED
+
+If deployment mode = SAAS:
+- show namespace text input
+- user manually enters namespacePath such as `my-group/platform`
+- show a live preview of the effective namespace URL using the GitLab host plus namespacePath
+- on save, persist selected namespacePath
+- on sync, backend must fetch groups and projects only for that namespace
+
+If deployment mode = SELF_MANAGED:
+- hide namespace input
+- sync all accessible groups and projects
+
+GitLab groups and projects should be rendered in separate tables.
+Each row should have:
+- human-readable columns
+- raw JSON view action
+- copy path/full-path action where useful
+
+9. STATE MANAGEMENT EXPECTATIONS
+
+Recommended state split:
+- auth state
+- layout state
+- server cache state via TanStack Query
+- transient UI modal/drawer state
+
+Do not manually fetch everything inside components without query abstraction.
+
+10. TABLE AND FORM STANDARDS
+
+Use reusable components for:
+- app table
+- search input
+- empty state
+- loading skeleton
+- confirmation dialog
+- modal / drawer
+- badge / pill
+- top action bar
+
+Forms must have:
+- client-side validation
+- backend error display
+- submit loading state
+- clear success feedback
+
+Popup / modal form behavior:
+- modal body must support vertical scrolling when content grows
+- scroll should remain functional but scrollbar should be visually hidden for a cleaner enterprise look
+- keep modal header and footer actions sticky when body content scrolls
+- on mobile, modal/drawer should use full-height layout with the same hidden-scroll behavior
+
+11. RESPONSIVENESS
+
+Must work on:
+- laptop screens
+- standard desktop screens
+- tablet width
+
+Mobile can be reduced but should not break.
+Navbar and sidebar should collapse gracefully.
+
+12. SEARCH REQUIREMENTS
+
+Add frontend search/filtering for:
+- users
+- roles
+- permissions
+- views
+- integrations
+- GitLab groups
+- GitLab projects
+- license audit
+
+Global search bar in navbar can initially be UI-only placeholder if needed, but structure it for future wiring.
+
+13. LOGO AND BRANDING
+
+Add:
+- App Defend logo placeholder
+- favicon placeholder
+- clean navbar branding block
+
+Use a flexible branding component so final brand assets can be swapped later.
+
+14. SECURITY AND SESSION UX
+
+Required:
+- logout action in account dropdown
+- session expiry handling
+- unauthorized page when 403 is returned
+- redirect to login on session loss
+- permission-aware hiding or disabling of page-level and action-level UI
+- route guards based on view and permission checks
+
+Frontend access-control implementation notes:
+- after login, cache user.roles, user.permissions, and user.views
+- build a centralized access-control hook or utility module
+- do not hardcode visibility logic inside random components
+- use declarative wrappers such as:
+  - ProtectedRoute
+  - RequirePermission
+  - RequireView
+  - PageAccessBoundary
+
+15. DELIVERABLES EXPECTED FROM FRONTEND ENGINEER
+
+Phase 1 deliverables:
+- React app bootstrapped
+- routing
+- auth flow
+- app shell
+- home page
+- users page
+- RBAC page
+- integrations page
+- GitLab page
+- licenses page
+
+Phase 2:
+- better tables
+- better filtering
+- permission-aware navigation
+- polish and animation
+
+16. IMPLEMENTATION NOTES
+
+- Use TypeScript interfaces matching backend responses
+- Build one API client module per domain:
+  - authApi
+  - usersApi
+  - rbacApi
+  - integrationsApi
+  - licensesApi
+  - gitlabApi
+- Keep backend base URL configurable through environment variable
+- Prefer optimistic but safe UI patterns
+- Use OpenAPI and live backend responses to refine edge cases
+
+17. IMPORTANT BACKEND NOTES
+
+- Backend uses JWT bearer auth
+- Some modules are license-gated
+- GitLab endpoints are available only when GitLab feature is licensed
+- Temporary license debug endpoints exist right now but should not be part of final polished production UX
+
+18. STARTING POINT RECOMMENDATION
+
+Build order:
+1. Project setup and routing
+2. App shell
+3. Login/logout/session handling
+4. Home dashboard
+5. Users page
+6. RBAC page
+7. Integrations page
+8. GitLab page with SaaS/self-managed behavior
+9. Licenses page
+10. Polish and error states
+
+19. CURRENT DEFAULT TEST CREDENTIALS
+
+Email:
+admin@appdefend.local
+
+Password:
+Admin@123

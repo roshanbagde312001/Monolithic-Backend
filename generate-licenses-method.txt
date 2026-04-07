@@ -4,6 +4,18 @@ Email: admin@appdefend.local
 Password: Admin@123
 
 
+{
+  "payloadJson": "{\"customerEmail\":\"licensing@codingvedha.local\",\"customerName\":\"Coding vedha\",\"deploymentId\":\"AIRGAP-DEFAULT\",\"features\":[\"RBAC\",\"OFFLINE_MODE\",\"GITLAB\",\"GITHUB_ACTIONS\",\"JENKINS\",\"BAMBOO\",\"REDIS_CACHE\"],\"gracePeriodDays\":15,\"issuedAt\":\"2026-04-05T13:59:37.155337+05:30\",\"issuer\":\"App Defend Licensing Authority\",\"licenseId\":\"LIC-1775377777152\",\"licenseTier\":\"ENTERPRISE\",\"maxNamedUsers\":250,\"metadata\":{\"airGapped\":true,\"issuedBy\":\"App Defend Licensing\",\"supportLevel\":\"24x7\"},\"validFrom\":\"2026-04-05\",\"validUntil\":\"2027-04-06\"}",
+  "signature": "KoTcn+TmH/bUzqjzD/YwB1mm4Yfb/Gm4NR55HbcGiyBnbWYjEaQJko70h39AxZ4LoHdaC5mF/N+u6Nf1LcDlXk9dyASJ+/o5YTfUSVqHFJSUwOqTqYPgOIgidNBbh0rIX4mG8lCMwim2aHg5yhvN5ENlo2UoOG7DBIQEDYKm3iz4q43ojLhA2Qm2ed604te3fmMdEgr/5ZjBdZ8zMj2FeAX1dqP1xLzAKZubUUkdoUJPnFvHLIlHbwEM4lxlVUZGyRmu0IzDVbRAStuH3J5hRWuKn9FvAU05l4ibT46K9JbGWk9znosQkfI8J7rr7bUvMPwot1xGkZovewFZNyfexQ=="
+}
+
+
+{
+  "email": "admin@appdefend.local",
+  "password": "Admin@123"
+}
+
+
 Use the generator class I added.
 
 Generate a signing keypair once:
@@ -68,3 +80,9 @@ Payload JSON:
 
 Signature:
 AjBJwnGD6W/rL4uIznZrWNw4hcUMLh50tG/a+3jziujlYuQclWuo9Pcyw2ydGGeA7iTf4fZFae5ufN6Yw8271bK0E3Wok+SVsCE4YeZSdsUfpyfV3DxooeVbOz7tCcusbUOgECdDhXA7KGjRZpbx9aFccV6FAbPKXLiukZNqbiibekuiwNaMkpdkuj9Eg/kBFbuoSrpA9eULCHrNBcZFxrYOuyqj/Ix3gARjLb9Ufdf9+yueqxDuKmJLCn+2o3CX6y0nc14YPtxcJB50AmYO68V8qwtToIqC9l2GTBQwiwltR/yqoB65fY5a82WLPWGbtaUSt8VY5SLU88DAZBkNKA==
+
+
+
+glpat-UBtAYBpo-SjtHq4GR_do82M6MQpvOjEKdTpjOTByeA8.01.1701sy7i5
+
+https://gitlab.com/api/v4/groups/fineshift/users/sameer/projects?include_subgroups=false
